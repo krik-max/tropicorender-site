@@ -50,6 +50,9 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
 .balance{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(232,165,87,.12);border:1px solid rgba(232,165,87,.25);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--amber);font-weight:600}
 .balance-num{font-size:14px}
 .balance-add{color:var(--amber);font-size:16px;margin-left:4px;cursor:pointer;text-decoration:none}
+.btn-signin{display:inline-flex;align-items:center;padding:8px 14px;background:var(--amber);color:var(--bg);border-radius:100px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:background .2s,transform .2s;white-space:nowrap}
+.btn-signin:hover{background:var(--amber-deep)}
+.btn-signin:active{transform:translateY(1px)}
 
 .lang-switch{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:12px}
 .lang-switch a{padding:6px 9px;color:var(--ink-dim);text-decoration:none;border-radius:6px;letter-spacing:.05em;font-weight:500;cursor:pointer}
@@ -121,6 +124,12 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
 .upload-slot-icon{width:36px;height:36px;margin-bottom:10px;border-radius:10px;background:rgba(232,165,87,.12);display:flex;align-items:center;justify-content:center;color:var(--amber)}
 .upload-slot-text{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
 .upload-slot-hint{font-size:11px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+.upload-slot.filled{padding:0;border-style:solid;border-color:var(--line-bright);overflow:hidden;position:relative;cursor:default;background:#000}
+.upload-slot.filled .slot-preview-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.upload-slot.filled .slot-meta{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:linear-gradient(to top,rgba(0,0,0,.75),rgba(0,0,0,0));color:#fff;font-size:12px;font-family:'JetBrains Mono',monospace}
+.upload-slot.filled .slot-filename{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.upload-slot.filled .slot-remove{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'Manrope',sans-serif;flex-shrink:0}
+.upload-slot.filled .slot-remove:hover{background:var(--coral);border-color:var(--coral)}
 
 /* PATH SWITCH (Write yourself / Pick template) */
 .path-switch{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
@@ -221,6 +230,7 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
       <a class="active">EN</a>
       <a href="/app-ru">RU</a>
     </div>
+    <a class="btn-signin" href="/auth">Sign in / Sign up</a>
     <div class="profile-btn" title="Max Yudin">M</div>
   </div>
 </nav>
@@ -331,19 +341,20 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
 
     <!-- Single upload (for sketch, floorplan, interior, complex) -->
     <div id="upload-single">
-      <div class="upload-zone" onclick="mockUpload()">
+      <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleUpload(this)">
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()">
         <div class="upload-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
         </div>
         <div class="upload-text">Drop your file here or click to browse</div>
-        <div class="upload-hint">JPG · PNG · WEBP · PDF · up to 10 MB</div>
+        <div class="upload-hint">JPG · PNG · WEBP · up to 10 MB</div>
       </div>
 
       <div class="upload-uploaded" id="upload-uploaded">
-        <div class="upload-preview-img"><img src="img/show-sketch.jpg" alt=""></div>
+        <div class="upload-preview-img"><img id="upload-preview-img" alt=""></div>
         <div class="upload-info">
-          <div class="upload-filename">villa-sketch-uluwatu.jpg</div>
-          <div class="upload-size">2.4 MB · 2400 × 1600 px</div>
+          <div class="upload-filename" id="upload-filename"></div>
+          <div class="upload-size" id="upload-size"></div>
         </div>
         <button class="upload-remove" onclick="removeUpload()">Remove</button>
       </div>
@@ -351,8 +362,10 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
 
     <!-- Two-slot upload (for "placement") -->
     <div id="upload-double" style="display:none">
+      <input type="file" id="slot-input-1" accept="image/*" style="display:none" onchange="handleSlotUpload(this, 1)">
+      <input type="file" id="slot-input-2" accept="image/*" style="display:none" onchange="handleSlotUpload(this, 2)">
       <div class="upload-slots">
-        <div class="upload-slot">
+        <div class="upload-slot" id="upload-slot-1" onclick="document.getElementById('slot-input-1').click()">
           <div class="upload-slot-label">1 · Plot photo</div>
           <div class="upload-slot-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -360,7 +373,7 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
           <div class="upload-slot-text">Empty land</div>
           <div class="upload-slot-hint">Photo of your plot</div>
         </div>
-        <div class="upload-slot">
+        <div class="upload-slot" id="upload-slot-2" onclick="document.getElementById('slot-input-2').click()">
           <div class="upload-slot-label">2 · House reference</div>
           <div class="upload-slot-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -595,19 +608,74 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
     });
   });
 
-  function mockUpload(){
+  function formatSize(bytes){
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(1) + ' MB';
+  }
+
+  function handleUpload(input){
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const img = document.getElementById('upload-preview-img');
+    if (img.dataset.objectUrl) URL.revokeObjectURL(img.dataset.objectUrl);
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    img.dataset.objectUrl = url;
+    document.getElementById('upload-filename').textContent = file.name;
+    document.getElementById('upload-size').textContent = formatSize(file.size);
     document.querySelector('#upload-single .upload-zone').style.display = 'none';
     document.getElementById('upload-uploaded').classList.add('show');
   }
+
   function removeUpload(){
-    document.querySelector('#upload-single .upload-zone').style.display = 'block';
+    const img = document.getElementById('upload-preview-img');
+    if (img.dataset.objectUrl){ URL.revokeObjectURL(img.dataset.objectUrl); img.dataset.objectUrl = ''; }
+    img.removeAttribute('src');
+    document.getElementById('upload-filename').textContent = '';
+    document.getElementById('upload-size').textContent = '';
+    document.getElementById('file-input').value = '';
+    document.querySelector('#upload-single .upload-zone').style.display = '';
     document.getElementById('upload-uploaded').classList.remove('show');
+  }
+
+  // Original innerHTML of each placement slot — captured once for restore on remove
+  const slotOriginalHTML = { 1: null, 2: null };
+
+  function handleSlotUpload(input, slotNum){
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const slot = document.getElementById('upload-slot-' + slotNum);
+    if (slotOriginalHTML[slotNum] === null) slotOriginalHTML[slotNum] = slot.innerHTML;
+    const url = URL.createObjectURL(file);
+    if (slot.dataset.objectUrl) URL.revokeObjectURL(slot.dataset.objectUrl);
+    slot.dataset.objectUrl = url;
+    slot.classList.add('filled');
+    slot.onclick = null;
+    slot.innerHTML =
+      '<img class="slot-preview-img" src="' + url + '" alt="">' +
+      '<div class="slot-meta">' +
+        '<span class="slot-filename"></span>' +
+        '<button class="slot-remove" type="button">Remove</button>' +
+      '</div>';
+    slot.querySelector('.slot-filename').textContent = file.name;
+    slot.querySelector('.slot-remove').addEventListener('click', function(ev){
+      ev.stopPropagation();
+      removeSlot(slotNum);
+    });
+  }
+
+  function removeSlot(slotNum){
+    const slot = document.getElementById('upload-slot-' + slotNum);
+    if (slot.dataset.objectUrl){ URL.revokeObjectURL(slot.dataset.objectUrl); slot.dataset.objectUrl = ''; }
+    slot.classList.remove('filled');
+    slot.innerHTML = slotOriginalHTML[slotNum];
+    slot.onclick = function(){ document.getElementById('slot-input-' + slotNum).click(); };
+    document.getElementById('slot-input-' + slotNum).value = '';
   }
 
   // Initial render for default task
   renderTemplates(currentTask);
-  // Pre-fill uploaded state for demo
-  setTimeout(mockUpload, 200);
 </script>
 
 </body>
