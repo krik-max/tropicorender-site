@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropico Render — Создать рендер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C1612;
+  --bg-2:#0F1B16;
+  --card:#152521;
+  --card-hover:#1B2E29;
+  --line:rgba(180,210,200,.08);
+  --line-bright:rgba(180,210,200,.18);
+  --ink:#EFEAE0;
+  --ink-dim:#A5B5AC;
+  --ink-low:#5E7068;
+  --amber:#E8A557;
+  --amber-deep:#C28233;
+  --tropic:#4ACB94;
+  --coral:#E87557;
+  --paper:#F5EFE2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Manrope',-apple-system,sans-serif;font-weight:400;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+.serif{font-family:'Fraunces',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* AMBIENT */
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4}
+.ambient::before{content:"";position:absolute;top:-30%;left:-10%;width:60%;height:60%;background:radial-gradient(circle,rgba(232,165,87,.1),transparent 60%);filter:blur(40px)}
+
+/* NAV */
+nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;background:rgba(12,22,18,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.nav-left{display:flex;align-items:center;gap:36px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+.logo-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--amber) 0%,var(--coral) 100%);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:500;font-style:italic;color:var(--bg);font-size:16px;position:relative}
+.logo-mark::before{content:"T"}
+.logo-text-1{font-family:'Fraunces',serif;font-weight:500;font-size:18px;letter-spacing:-.02em}
+.nav-tabs{display:flex;gap:4px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:11px;padding:3px}
+.nav-tab{padding:9px 16px;background:transparent;border:none;color:var(--ink-dim);font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.nav-tab:hover{color:var(--ink)}
+.nav-tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 0 var(--line-bright) inset}
+
+.nav-right{display:flex;align-items:center;gap:14px}
+.balance{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(232,165,87,.12);border:1px solid rgba(232,165,87,.25);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--amber);font-weight:600}
+.balance-num{font-size:14px}
+.balance-add{color:var(--amber);font-size:16px;margin-left:4px;cursor:pointer;text-decoration:none}
+
+.lang-switch{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.lang-switch a{padding:6px 9px;color:var(--ink-dim);text-decoration:none;border-radius:6px;letter-spacing:.05em;font-weight:500;cursor:pointer}
+.lang-switch a.active{background:var(--ink);color:var(--bg);font-weight:600}
+
+.profile-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--coral));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-style:italic;color:var(--bg);font-size:16px;cursor:pointer;border:1px solid var(--line-bright);transition:all .2s}
+.profile-btn:hover{transform:scale(1.05)}
+
+/* CONTAINER */
+.container{max-width:1200px;margin:0 auto;padding:40px 32px 80px;position:relative;z-index:1}
+
+/* PAGE HEAD */
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;gap:32px;flex-wrap:wrap}
+.page-h1{font-family:'Fraunces',serif;font-size:42px;line-height:1;letter-spacing:-.025em;font-weight:400}
+.page-h1 em{font-style:italic;color:var(--amber)}
+.page-sub{font-size:15px;color:var(--ink-dim);margin-top:8px}
+.help-line{font-size:13px;color:var(--ink-dim);text-align:right;line-height:1.5}
+.help-line a{color:var(--amber);text-decoration:none;font-weight:500}
+.help-line a:hover{text-decoration:underline}
+
+/* STEPS */
+.step{margin-bottom:32px}
+.step-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(232,165,87,.12);border:1px solid rgba(232,165,87,.25);color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-title{font-family:'Fraunces',serif;font-size:22px;font-weight:500;letter-spacing:-.01em}
+.step-title em{font-style:italic;color:var(--amber)}
+.step-optional{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink-low);background:rgba(255,255,255,.04);border:1px solid var(--line);padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.1em}
+.step-premium{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--amber);background:rgba(232,165,87,.12);border:1px solid rgba(232,165,87,.25);padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+
+/* TASK TYPE CARDS (Step 1) */
+.task-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.task-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative;display:flex;flex-direction:column;min-height:200px}
+.task-card:hover{border-color:var(--line-bright);transform:translateY(-2px)}
+.task-card.selected{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber),0 12px 30px rgba(232,165,87,.18)}
+.task-card-img{position:relative;flex:1;overflow:hidden;background:#000;min-height:140px}
+.task-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.task-card-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.5) 100%)}
+.task-card-body{padding:14px 18px 16px;background:var(--card)}
+.task-card-icon{position:absolute;top:14px;left:14px;width:32px;height:32px;border-radius:9px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;z-index:2}
+.task-card-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;line-height:1.1;letter-spacing:-.005em;margin-bottom:4px}
+.task-card-title em{font-style:italic;color:var(--amber)}
+.task-card-desc{font-size:12px;color:var(--ink-dim);line-height:1.4}
+.task-card-check{display:none;position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--bg);align-items:center;justify-content:center;font-weight:700;z-index:3;font-size:14px;border:2px solid var(--paper)}
+.task-card.selected .task-card-check{display:flex}
+.task-card-premium{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);background:rgba(232,165,87,.18);backdrop-filter:blur(10px);border:1px solid rgba(232,165,87,.35);padding:4px 8px;border-radius:100px;letter-spacing:.05em;font-weight:600;text-transform:uppercase;z-index:2}
+.task-card.selected .task-card-premium{display:none}
+
+/* UPLOAD */
+.upload-zone{padding:50px 30px;background:var(--card);border:2px dashed var(--line-bright);border-radius:18px;text-align:center;cursor:pointer;transition:all .25s}
+.upload-zone:hover{border-color:var(--amber);background:var(--card-hover)}
+.upload-icon{width:46px;height:46px;margin:0 auto 14px;border-radius:13px;background:rgba(232,165,87,.12);display:flex;align-items:center;justify-content:center;color:var(--amber)}
+.upload-text{font-size:15px;font-weight:500;margin-bottom:5px;color:var(--ink)}
+.upload-hint{font-size:12px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+.upload-uploaded{display:none;align-items:center;gap:16px;padding:14px;background:var(--card);border:1px solid var(--line-bright);border-radius:18px}
+.upload-uploaded.show{display:flex}
+.upload-preview-img{width:100px;height:100px;border-radius:12px;background:#000;flex-shrink:0;overflow:hidden}
+.upload-preview-img img{width:100%;height:100%;object-fit:cover}
+.upload-info{flex:1;min-width:0}
+.upload-filename{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--ink)}
+.upload-size{font-size:12px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+.upload-remove{font-size:13px;color:var(--coral);background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 14px;cursor:pointer;font-family:'Manrope',sans-serif;font-weight:500;transition:all .2s}
+.upload-remove:hover{background:rgba(232,117,87,.08);border-color:var(--coral)}
+
+/* TWO-SLOT UPLOAD (for "Place on plot") */
+.upload-slots{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.upload-slot{padding:30px 22px;background:var(--card);border:2px dashed var(--line-bright);border-radius:16px;text-align:center;cursor:pointer;transition:all .25s;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.upload-slot:hover{border-color:var(--amber);background:var(--card-hover)}
+.upload-slot-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.upload-slot-icon{width:36px;height:36px;margin-bottom:10px;border-radius:10px;background:rgba(232,165,87,.12);display:flex;align-items:center;justify-content:center;color:var(--amber)}
+.upload-slot-text{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.upload-slot-hint{font-size:11px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+
+/* PATH SWITCH (Write yourself / Pick template) */
+.path-switch{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.path-card{padding:24px 22px;background:var(--card);border:1px solid var(--line);border-radius:16px;cursor:pointer;transition:all .25s;text-align:left}
+.path-card:hover{border-color:var(--line-bright);transform:translateY(-1px)}
+.path-card.active{border-color:var(--amber);background:linear-gradient(135deg,rgba(232,165,87,.08),var(--card))}
+.path-card-icon{width:38px;height:38px;border-radius:11px;background:rgba(232,165,87,.12);color:var(--amber);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.path-card-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-.005em;margin-bottom:4px}
+.path-card-title em{font-style:italic;color:var(--amber)}
+.path-card-desc{font-size:13px;color:var(--ink-dim);line-height:1.45}
+
+/* TEMPLATES GRID */
+.templates-grid{display:none;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.templates-grid.open{display:grid}
+.template-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative;aspect-ratio:5/4;display:flex;flex-direction:column}
+.template-card:hover{border-color:var(--line-bright);transform:translateY(-2px)}
+.template-card.selected{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.template-card-img{flex:1;position:relative;overflow:hidden;background:#000}
+.template-card-img img{width:100%;height:100%;object-fit:cover}
+.template-card-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.8) 100%)}
+.template-card-name{position:absolute;left:12px;right:12px;bottom:10px;font-size:13px;font-weight:600;color:var(--paper);line-height:1.2;z-index:2}
+.template-card-check{display:none;position:absolute;top:10px;right:10px;width:22px;height:22px;background:var(--amber);color:var(--bg);border-radius:50%;align-items:center;justify-content:center;font-weight:700;z-index:3;font-size:12px;border:2px solid var(--paper)}
+.template-card.selected .template-card-check{display:flex}
+
+/* ATMOSPHERE CHIPS (for complex & placement) */
+.atmosphere-block{margin-bottom:18px}
+.atmosphere-group{margin-bottom:18px}
+.atmosphere-group-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-low);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;font-weight:600}
+.atmosphere-chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;background:var(--card);border:1px solid var(--line);border-radius:100px;color:var(--ink-dim);font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;user-select:none}
+.chip:hover{border-color:var(--line-bright);color:var(--ink)}
+.chip.active{background:rgba(232,165,87,.12);border-color:var(--amber);color:var(--amber);font-weight:600}
+.chip-icon{display:inline-block;margin-right:5px;opacity:.85}
+
+/* PROMPT TEXTAREA */
+.prompt-area{padding:16px 18px;background:rgba(0,0,0,.25);border:1px solid var(--line-bright);border-radius:14px;color:var(--ink);font-family:'Manrope',sans-serif;font-size:14px;font-weight:500;width:100%;resize:vertical;min-height:120px;line-height:1.55;transition:all .2s}
+.prompt-area:focus{outline:none;border-color:var(--amber);background:rgba(0,0,0,.4)}
+.prompt-area::placeholder{color:var(--ink-low)}
+.prompt-counter{text-align:right;font-size:12px;color:var(--ink-low);font-family:'JetBrains Mono',monospace;margin-top:6px}
+
+/* SUBMIT BAR */
+.submit-bar{margin-top:40px;padding:24px;background:linear-gradient(135deg,var(--card),var(--bg-2));border:1px solid var(--line-bright);border-radius:18px;display:flex;justify-content:space-between;align-items:center;gap:20px;position:sticky;bottom:20px;backdrop-filter:blur(20px)}
+.submit-info{flex:1;min-width:0}
+.submit-info-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;margin-bottom:4px;letter-spacing:-.005em}
+.submit-info-meta{font-size:13px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace}
+.submit-info-meta strong{color:var(--amber)}
+.submit-btn{padding:16px 32px;background:var(--amber);color:var(--bg);border:1px solid var(--amber);border-radius:13px;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.submit-btn:hover{background:var(--coral);border-color:var(--coral);transform:translateY(-1px);box-shadow:0 12px 30px rgba(232,165,87,.25)}
+.submit-arrow{transition:transform .2s}
+.submit-btn:hover .submit-arrow{transform:translateX(3px)}
+
+/* RESPONSIVE */
+@media (max-width:900px){
+  nav{padding:14px 18px;flex-wrap:wrap;gap:12px}
+  .nav-tabs{order:3;width:100%;overflow-x:auto}
+  .nav-tab{flex-shrink:0}
+  .container{padding:24px 18px 100px}
+  .page-head{flex-direction:column;align-items:flex-start;gap:14px}
+  .help-line{text-align:left}
+  .page-h1{font-size:30px}
+  .task-grid{grid-template-columns:1fr 1fr}
+  .templates-grid{grid-template-columns:1fr 1fr}
+  .path-switch{grid-template-columns:1fr}
+  .upload-slots{grid-template-columns:1fr}
+  .submit-bar{flex-direction:column;align-items:stretch}
+  .submit-btn{width:100%;justify-content:center}
+}
+@media (max-width:500px){
+  .task-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<nav>
+  <div class="nav-left">
+    <a href="index-ru.html" class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text-1">Tropico</div>
+    </a>
+    <div class="nav-tabs">
+      <a href="app-ru.html" class="nav-tab active">▸ Создать</a>
+      <a href="app-history-ru.html" class="nav-tab">Мои работы</a>
+      <a href="#" class="nav-tab">Оплата</a>
+      <a href="#" class="nav-tab">Настройки</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="balance">
+      <span>✦</span>
+      <span class="balance-num">2</span>
+      <span style="opacity:.7">рендера</span>
+      <a href="#" class="balance-add">+</a>
+    </div>
+    <div class="lang-switch">
+      <a href="app.html">EN</a>
+      <a class="active">RU</a>
+    </div>
+    <div class="profile-btn" title="Максим Юдин">M</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-h1">Создать <em>новый рендер</em></h1>
+      <p class="page-sub">Выберите тип задачи, загрузите файл, опишите результат и нажмите «Сгенерировать».</p>
+    </div>
+    <div class="help-line">
+      Нужна помощь? <a href="#">Написать Максу в WhatsApp</a><br>
+      Не получается? <a href="#">Посмотрите примеры</a>
+    </div>
+  </div>
+
+  <!-- STEP 1: TASK TYPE -->
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div class="step-title">Что вы хотите <em>отрендерить?</em></div>
+    </div>
+    <div class="task-grid">
+
+      <div class="task-card selected" onclick="selectTask(this, 'sketch')">
+        <div class="task-card-img">
+          <img src="img/show-sketch.jpg" alt="">
+          <div class="task-card-icon">✏️</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-body">
+          <div class="task-card-title">По <em>эскизу</em></div>
+          <div class="task-card-desc">Карандашный набросок, скриншот SketchUp или грубый эскиз → фотореалистичный рендер</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="selectTask(this, 'floorplan')">
+        <div class="task-card-img">
+          <img src="img/show-plan.jpg" alt="">
+          <div class="task-card-icon">📐</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-body">
+          <div class="task-card-title">По <em>плану</em></div>
+          <div class="task-card-desc">2D-план или вид сверху → 3D-фасад или интерьер</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="selectTask(this, 'placement')">
+        <div class="task-card-img">
+          <img src="img/show-plot-after.jpg" alt="">
+          <div class="task-card-icon">📍</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-body">
+          <div class="task-card-title">Примерка <em>на участке</em></div>
+          <div class="task-card-desc">Фото пустого участка + референс дома → вилла на вашем реальном участке</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="selectTask(this, 'complex')">
+        <div class="task-card-img">
+          <img src="img/complex-masterplan.jpg" alt="">
+          <div class="task-card-icon">🌴</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-premium">✦ $10 премиум</div>
+        <div class="task-card-body">
+          <div class="task-card-title">Комплекс или <em>посёлок</em></div>
+          <div class="task-card-desc">Виды с дрона, мастер-планы с подписями — для девелоперов и инвестпрезентаций</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="selectTask(this, 'interior')">
+        <div class="task-card-img">
+          <img src="img/int-living.jpg" alt="">
+          <div class="task-card-icon">🛋️</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-body">
+          <div class="task-card-title">Интерьер <em>и рестайл</em></div>
+          <div class="task-card-desc">Пустая комната → меблированная. Существующий интерьер → перестилизованный. Любая комната, любой стиль</div>
+        </div>
+      </div>
+
+      <div class="task-card" onclick="selectTask(this, 'text')">
+        <div class="task-card-img">
+          <img src="img/atm-family.jpg" alt="">
+          <div class="task-card-icon">📝</div>
+        </div>
+        <div class="task-card-check">✓</div>
+        <div class="task-card-body">
+          <div class="task-card-title">Из <em>текста</em></div>
+          <div class="task-card-desc">Нет файла? Просто опишите идею — AI придумает с нуля</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STEP 2: UPLOAD (dynamic based on task type) -->
+  <div class="step" id="upload-step">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div class="step-title">Загрузите <em>файл</em></div>
+    </div>
+
+    <!-- Single upload (for sketch, floorplan, interior, complex) -->
+    <div id="upload-single">
+      <div class="upload-zone" onclick="mockUpload()">
+        <div class="upload-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </div>
+        <div class="upload-text">Перетащите файл сюда или нажмите для выбора</div>
+        <div class="upload-hint">JPG · PNG · WEBP · PDF · до 10 МБ</div>
+      </div>
+
+      <div class="upload-uploaded" id="upload-uploaded">
+        <div class="upload-preview-img"><img src="img/show-sketch.jpg" alt=""></div>
+        <div class="upload-info">
+          <div class="upload-filename">эскиз-виллы-улувату.jpg</div>
+          <div class="upload-size">2.4 MB · 2400 × 1600 px</div>
+        </div>
+        <button class="upload-remove" onclick="removeUpload()">Удалить</button>
+      </div>
+    </div>
+
+    <!-- Two-slot upload (for "placement") -->
+    <div id="upload-double" style="display:none">
+      <div class="upload-slots">
+        <div class="upload-slot">
+          <div class="upload-slot-label">1 · Фото участка</div>
+          <div class="upload-slot-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          </div>
+          <div class="upload-slot-text">Пустой участок</div>
+          <div class="upload-slot-hint">Фото вашего участка</div>
+        </div>
+        <div class="upload-slot">
+          <div class="upload-slot-label">2 · Референс дома</div>
+          <div class="upload-slot-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          </div>
+          <div class="upload-slot-text">Дом для примерки</div>
+          <div class="upload-slot-hint">Фото или рендер виллы</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No upload (for "text" task) -->
+    <div id="upload-none" style="display:none">
+      <div style="padding:30px;background:var(--card);border:1px solid var(--line);border-radius:16px;text-align:center;color:var(--ink-dim);font-size:14px">
+        <div style="font-size:32px;margin-bottom:10px">✨</div>
+        Файл не нужен — просто опишите что вы хотите ниже.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: DESCRIBE -->
+  <div class="step">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div class="step-title">Опишите <em>что хотите</em></div>
+    </div>
+
+    <!-- PATH SWITCH (shown for sketch, floorplan, interior) -->
+    <div class="path-switch" id="path-switch">
+      <div class="path-card active" onclick="selectPath(this, 'write')">
+        <div class="path-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </div>
+        <div class="path-card-title">Напишите <em>сами</em></div>
+        <p class="path-card-desc">Вы знаете что хотите. Просто опишите своими словами — AI сделает остальное.</p>
+      </div>
+
+      <div class="path-card" onclick="selectPath(this, 'template')">
+        <div class="path-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div class="path-card-title">Выберите <em>отправную точку</em></div>
+        <p class="path-card-desc">Готовые промпты-шаблоны. Выберите подходящий, отредактируйте под себя.</p>
+      </div>
+    </div>
+
+    <!-- Templates grid (rendered dynamically by JS based on task type) -->
+    <div class="templates-grid" id="templates-grid"></div>
+
+    <!-- ATMOSPHERE CHIPS (shown for complex & placement) -->
+    <div class="atmosphere-block" id="atmosphere-block" style="display:none">
+      <div class="atmosphere-group">
+        <div class="atmosphere-group-label">Время суток</div>
+        <div class="atmosphere-chips" data-group="time">
+          <div class="chip active" data-value="sunrise">🌅 Рассвет</div>
+          <div class="chip" data-value="day">☀️ Полдень</div>
+          <div class="chip" data-value="golden">🌇 Золотой час</div>
+          <div class="chip" data-value="blue">🌆 Синий час</div>
+          <div class="chip" data-value="night">🌙 Ночь</div>
+        </div>
+      </div>
+      <div class="atmosphere-group">
+        <div class="atmosphere-group-label">Погода</div>
+        <div class="atmosphere-chips" data-group="weather">
+          <div class="chip active" data-value="clear">Ясно</div>
+          <div class="chip" data-value="cloudy">Пасмурно</div>
+          <div class="chip" data-value="mist">Утренний туман</div>
+          <div class="chip" data-value="dramatic">Драматичные облака</div>
+        </div>
+      </div>
+      <div class="atmosphere-group">
+        <div class="atmosphere-group-label">Ракурс</div>
+        <div class="atmosphere-chips" data-group="view">
+          <div class="chip active" data-value="drone">С дрона</div>
+          <div class="chip" data-value="eye">С уровня глаз</div>
+          <div class="chip" data-value="hilltop">С холма</div>
+        </div>
+      </div>
+      <div class="atmosphere-group" id="density-group">
+        <div class="atmosphere-group-label">Плотность</div>
+        <div class="atmosphere-chips" data-group="density">
+          <div class="chip" data-value="sparse">Мало (3-5 вилл)</div>
+          <div class="chip active" data-value="medium">Средне (8-12)</div>
+          <div class="chip" data-value="dense">Много (15+)</div>
+        </div>
+      </div>
+    </div>
+
+    <textarea class="prompt-area" id="prompt-area" placeholder="Например: современная тропическая вилла на скале с бесконечным бассейном, тёмная тиковая облицовка, белые бетонные стены, панорамный стеклянный фасад, освещение золотого часа, пальмы и франжипани..." maxlength="500" oninput="document.getElementById('counter').textContent = this.value.length + ' / 500'"></textarea>
+    <div class="prompt-counter" id="counter">0 / 500</div>
+  </div>
+
+  <!-- SUBMIT BAR -->
+  <div class="submit-bar">
+    <div class="submit-info">
+      <div class="submit-info-title">Готовы?</div>
+      <div class="submit-info-meta" id="submit-meta">Использует <strong>1 из 2</strong> рендеров · ~60 секунд</div>
+    </div>
+    <button class="submit-btn" onclick="alert('Render started (mock)')">
+      ✦ Сгенерировать <span class="submit-arrow">→</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  let currentTask = 'sketch';
+  let currentPath = 'write';
+
+  // Templates per task type. null means "no templates UI for this task".
+  const TEMPLATES = {
+    sketch: [
+      { img: 'img/villa-golden-hour.jpg', name: 'Современная вилла, золотой час', prompt: "Modern tropical Bali villa, golden hour lighting, infinity pool with ocean view, dark teak wood cladding, white polished concrete walls, panoramic glass facade, lush landscaping with palm trees and frangipani, photorealistic architectural visualization" },
+      { img: 'img/villa-cliffside.jpg', name: 'Премиум-вилла на скале', prompt: "Cliffside luxury villa on Uluwatu coastline, dramatic sunset sky, infinity pool overlooking ocean, exposed concrete and dark wood architecture, glass railings, palm trees, cinematic atmosphere" },
+      { img: 'img/villa-beachfront.jpg', name: 'Вилла на берегу океана', prompt: "Beachfront tropical villa in blue hour, warm interior lighting glowing through floor-to-ceiling windows, white sand beach in foreground, palm tree silhouettes, modern flat-roof architecture" },
+      { img: 'img/villa-jungle.jpg', name: 'Вилла в джунглях', prompt: "Modern villa integrated into Ubud jungle, morning mist, dark teak wood and concrete construction, infinity pool surrounded by tropical foliage, banana trees and ferns, atmospheric" },
+      { img: 'img/villa-modern.jpg', name: 'Тропический минимализм', prompt: "Minimal tropical villa, midday sunlight, clean white surfaces, single-storey design, large pool, monstera plants, contemporary furniture visible through glass walls" }
+    ],
+    floorplan: [
+      { img: 'img/villa-modern.jpg', name: 'План → 3D-фасад', prompt: "Convert this 2D floor plan into a photorealistic 3D exterior view of a tropical villa, single-storey design, white concrete walls, dark wood accents, large windows, palm landscaping, midday lighting" },
+      { img: 'img/villa-golden-hour.jpg', name: 'План → кинематографичный экстерьер', prompt: "Photorealistic 3D rendering based on this floor plan, modern Bali villa exterior, golden hour lighting, infinity pool, dark teak cladding, panoramic glass walls, tropical landscaping" },
+      { img: 'img/int-living.jpg', name: 'План → интерьерный вид', prompt: "Render this floor plan as a photorealistic interior view, open living and dining area, tropical modern style, light wood floors, white walls, large windows with garden view, natural daylight" },
+      { img: 'img/show-furnished.jpg', name: 'План → меблированный дом', prompt: "Photorealistic interior visualization from this floor plan, fully furnished tropical home, neutral palette, rattan and teak furniture, large indoor plants, soft daylight from windows" }
+    ],
+    interior: [
+      { img: 'img/int-living.jpg', name: 'Гостиная', prompt: "Photorealistic tropical modern living room, light teak wood floors, white walls, low-profile linen sofa, rattan accent chairs, large windows opening to tropical garden, indoor plants, soft natural daylight, magazine-quality interior visualization" },
+      { img: 'img/int-bedroom.jpg', name: 'Спальня', prompt: "Photorealistic tropical master bedroom, king-size bed with white linen, dark teak wood headboard, large window with palm tree view, ceiling fan, warm morning light, calm minimalist design, hardwood floors" },
+      { img: 'img/int-bathroom.jpg', name: 'Ванная', prompt: "Photorealistic tropical bathroom, stone or terrazzo floor, walk-in rain shower with greenery view, freestanding stone bathtub, teak wood vanity, brass fixtures, indoor plants, soft daylight" },
+      { img: 'img/show-furnished.jpg', name: 'Кухня', prompt: "Photorealistic tropical modern kitchen, white concrete countertops, dark teak cabinetry, large island with bar seating, brass fixtures, open shelves with ceramics, large windows with garden view, natural daylight" },
+      { img: 'img/show-upgrade.jpg', name: 'Перестилизовать существующий', prompt: "Restyle this existing interior into a tropical modern aesthetic — keep the room layout and architecture, replace furniture and finishes with light teak wood, white walls, rattan and linen textures, indoor plants, warm natural lighting" }
+    ]
+  };
+
+  // Tasks where atmosphere chips replace templates: complex (with density), placement (without density), text (none)
+  const ATMOSPHERE_TASKS = ['complex', 'placement'];
+
+  function renderTemplates(taskId){
+    const grid = document.getElementById('templates-grid');
+    const items = TEMPLATES[taskId];
+    if (!items) {
+      grid.innerHTML = '';
+      return;
+    }
+    grid.innerHTML = items.map((t, i) => `
+      <div class="template-card" onclick="selectTemplate(this, '${taskId}', ${i})">
+        <div class="template-card-img"><img src="${t.img}" alt=""></div>
+        <div class="template-card-check">✓</div>
+        <div class="template-card-name">${t.name}</div>
+      </div>
+    `).join('');
+  }
+
+  function updateStep3UI(taskId){
+    const pathSwitch = document.getElementById('path-switch');
+    const templatesGrid = document.getElementById('templates-grid');
+    const atmosphereBlock = document.getElementById('atmosphere-block');
+    const densityGroup = document.getElementById('density-group');
+    const promptArea = document.getElementById('prompt-area');
+
+    if (ATMOSPHERE_TASKS.includes(taskId)) {
+      // Complex / placement: show atmosphere chips, hide path-switch + templates
+      pathSwitch.style.display = 'none';
+      templatesGrid.classList.remove('open');
+      atmosphereBlock.style.display = 'block';
+      densityGroup.style.display = taskId === 'complex' ? 'block' : 'none';
+      promptArea.placeholder = taskId === 'complex'
+        ? "Например: бутик-резорт на 10 вилл, центральный бассейн и йога-павильон, окружён рисовыми полями, дорожки изгибаются вокруг..."
+        : "Например: разместите двухэтажную виллу на участке, ориентированную к океану, с сохранением пальм на южной стороне...";
+    } else if (taskId === 'text') {
+      // Text only: no path-switch, no templates, no chips — just textarea
+      pathSwitch.style.display = 'none';
+      templatesGrid.classList.remove('open');
+      atmosphereBlock.style.display = 'none';
+      promptArea.placeholder = "Опишите что вы хотите с нуля. Тип здания, стиль, материалы, окружение, время суток, настроение — чем больше деталей, тем лучше.";
+    } else {
+      // Sketch / floorplan / interior: standard path-switch + templates
+      pathSwitch.style.display = 'grid';
+      atmosphereBlock.style.display = 'none';
+      renderTemplates(taskId);
+      // Reset path state to "write" on task switch
+      document.querySelectorAll('.path-card').forEach((c, i) => c.classList.toggle('active', i === 0));
+      currentPath = 'write';
+      templatesGrid.classList.remove('open');
+      promptArea.placeholder = "E.g. Modern tropical Bali villa on a cliff with infinity pool, dark teak wood cladding, white concrete walls, panoramic glass facade, golden hour lighting, palm trees and frangipani in the landscape...";
+    }
+  }
+
+  function selectTask(el, taskId){
+    document.querySelectorAll('.task-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    currentTask = taskId;
+
+    // Switch upload layout based on task
+    document.getElementById('upload-single').style.display = (taskId === 'placement' || taskId === 'text') ? 'none' : 'block';
+    document.getElementById('upload-double').style.display = (taskId === 'placement') ? 'block' : 'none';
+    document.getElementById('upload-none').style.display = (taskId === 'text') ? 'block' : 'none';
+
+    // Update Step 3 UI based on task
+    updateStep3UI(taskId);
+
+    // Update submit meta for premium tier
+    const meta = document.getElementById('submit-meta');
+    if (taskId === 'complex') {
+      meta.innerHTML = '<strong style="color:var(--amber)">Премиум-рендер</strong> — 1 из 2 бесплатных ИЛИ $10 · ~60 секунд';
+    } else {
+      meta.innerHTML = 'Использует <strong>1 из 2</strong> рендеров · ~60 секунд';
+    }
+  }
+
+  function selectPath(el, path){
+    document.querySelectorAll('.path-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentPath = path;
+    document.getElementById('templates-grid').classList.toggle('open', path === 'template');
+  }
+
+  function selectTemplate(el, taskId, idx){
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const textarea = document.getElementById('prompt-area');
+    const items = TEMPLATES[taskId];
+    textarea.value = (items && items[idx]) ? items[idx].prompt : '';
+    document.getElementById('counter').textContent = textarea.value.length + ' / 500';
+  }
+
+  // Atmosphere chips: single-select within each group
+  document.querySelectorAll('.atmosphere-chips').forEach(group => {
+    group.addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  function mockUpload(){
+    document.querySelector('#upload-single .upload-zone').style.display = 'none';
+    document.getElementById('upload-uploaded').classList.add('show');
+  }
+  function removeUpload(){
+    document.querySelector('#upload-single .upload-zone').style.display = 'block';
+    document.getElementById('upload-uploaded').classList.remove('show');
+  }
+
+  // Initial render for default task
+  renderTemplates(currentTask);
+  // Pre-fill uploaded state for demo
+  setTimeout(mockUpload, 200);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropico Render — My works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0C1612;
+  --bg-2:#0F1B16;
+  --card:#152521;
+  --card-hover:#1B2E29;
+  --line:rgba(180,210,200,.08);
+  --line-bright:rgba(180,210,200,.18);
+  --ink:#EFEAE0;
+  --ink-dim:#A5B5AC;
+  --ink-low:#5E7068;
+  --amber:#E8A557;
+  --amber-deep:#C28233;
+  --tropic:#4ACB94;
+  --coral:#E87557;
+  --paper:#F5EFE2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Manrope',-apple-system,sans-serif;font-weight:400;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4}
+.ambient::before{content:"";position:absolute;top:-30%;left:-10%;width:60%;height:60%;background:radial-gradient(circle,rgba(232,165,87,.1),transparent 60%);filter:blur(40px)}
+
+/* NAV (same as app.html) */
+nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;background:rgba(12,22,18,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.nav-left{display:flex;align-items:center;gap:36px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
+.logo-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--amber),var(--coral));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:500;font-style:italic;color:var(--bg);font-size:16px}
+.logo-mark::before{content:"T"}
+.logo-text-1{font-family:'Fraunces',serif;font-weight:500;font-size:18px;letter-spacing:-.02em}
+.nav-tabs{display:flex;gap:4px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:11px;padding:3px}
+.nav-tab{padding:9px 16px;background:transparent;border:none;color:var(--ink-dim);font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;text-decoration:none}
+.nav-tab:hover{color:var(--ink)}
+.nav-tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 0 var(--line-bright) inset}
+.nav-right{display:flex;align-items:center;gap:14px}
+.balance{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(232,165,87,.12);border:1px solid rgba(232,165,87,.25);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--amber);font-weight:600}
+.balance-add{color:var(--amber);font-size:16px;margin-left:4px;cursor:pointer;text-decoration:none}
+.lang-switch{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:3px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.lang-switch a{padding:6px 9px;color:var(--ink-dim);text-decoration:none;border-radius:6px;letter-spacing:.05em;font-weight:500;cursor:pointer}
+.lang-switch a.active{background:var(--ink);color:var(--bg);font-weight:600}
+.profile-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--coral));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-style:italic;color:var(--bg);font-size:16px;cursor:pointer;border:1px solid var(--line-bright)}
+
+/* CONTAINER */
+.container{max-width:1280px;margin:0 auto;padding:40px 32px 80px;position:relative;z-index:1}
+
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;gap:32px;flex-wrap:wrap}
+.page-h1{font-family:'Fraunces',serif;font-size:42px;line-height:1;letter-spacing:-.025em;font-weight:400}
+.page-h1 em{font-style:italic;color:var(--amber)}
+.page-sub{font-size:15px;color:var(--ink-dim);margin-top:8px}
+.page-count{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-dim);letter-spacing:.05em}
+.page-count strong{color:var(--amber);font-size:16px}
+
+/* FILTERS */
+.filters{display:flex;align-items:center;gap:10px;margin-bottom:32px;flex-wrap:wrap}
+.filter-chip{padding:9px 16px;background:var(--card);border:1px solid var(--line);border-radius:100px;color:var(--ink-dim);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Manrope',sans-serif}
+.filter-chip:hover{color:var(--ink);border-color:var(--line-bright)}
+.filter-chip.active{background:var(--amber);color:var(--bg);border-color:var(--amber);font-weight:600}
+.filter-divider{width:1px;height:20px;background:var(--line)}
+.filter-sort{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-dim);display:flex;align-items:center;gap:8px}
+.filter-sort select{padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+
+/* WORKS GRID */
+.works-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.work-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column}
+.work-card:hover{border-color:var(--line-bright);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.work-card-img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#000}
+.work-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s}
+.work-card:hover .work-card-img img{transform:scale(1.04)}
+.work-card-tag{position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--paper);background:rgba(0,0,0,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:100px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;z-index:2}
+.work-card-premium{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);background:rgba(232,165,87,.18);backdrop-filter:blur(10px);border:1px solid rgba(232,165,87,.35);padding:5px 10px;border-radius:100px;letter-spacing:.05em;font-weight:600;text-transform:uppercase;z-index:2}
+.work-card-actions{position:absolute;bottom:14px;left:14px;right:14px;display:flex;gap:8px;opacity:0;transition:opacity .25s;z-index:2}
+.work-card:hover .work-card-actions{opacity:1}
+.work-card-action{padding:8px 14px;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);color:var(--paper);font-size:12px;font-weight:600;border-radius:9px;text-decoration:none;font-family:'Manrope',sans-serif;cursor:pointer;transition:all .2s}
+.work-card-action:hover{background:var(--paper);color:var(--bg);border-color:var(--paper)}
+.work-card-action-primary{background:var(--amber);color:var(--bg);border-color:var(--amber)}
+.work-card-action-primary:hover{background:var(--coral);border-color:var(--coral)}
+.work-card-body{padding:16px 18px 18px;background:var(--card)}
+.work-card-title{font-family:'Fraunces',serif;font-size:17px;font-weight:500;line-height:1.2;letter-spacing:-.005em;margin-bottom:6px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.work-card-meta{font-size:11px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.02em;display:flex;gap:10px;align-items:center}
+.work-card-meta span{display:flex;align-items:center;gap:4px}
+.work-card-meta span::before{content:"·";color:var(--ink-low)}
+.work-card-meta span:first-child::before{display:none}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:80px 20px;background:var(--card);border:1px dashed var(--line-bright);border-radius:24px}
+.empty-icon{width:80px;height:80px;margin:0 auto 24px;border-radius:24px;background:linear-gradient(135deg,rgba(232,165,87,.15),rgba(232,117,87,.08));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-style:italic;color:var(--amber);font-size:36px;font-weight:500}
+.empty-title{font-family:'Fraunces',serif;font-size:28px;font-weight:400;margin-bottom:12px;letter-spacing:-.015em}
+.empty-title em{font-style:italic;color:var(--amber)}
+.empty-desc{font-size:15px;color:var(--ink-dim);max-width:400px;margin:0 auto 28px;line-height:1.55}
+.empty-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;background:var(--amber);color:var(--bg);border-radius:11px;text-decoration:none;font-weight:600;font-size:14px;transition:all .2s}
+.empty-cta:hover{background:var(--coral);transform:translateY(-1px)}
+
+/* RESPONSIVE */
+@media (max-width:900px){
+  nav{padding:14px 18px;flex-wrap:wrap;gap:12px}
+  .nav-tabs{order:3;width:100%;overflow-x:auto}
+  .nav-tab{flex-shrink:0}
+  .container{padding:24px 18px 100px}
+  .page-h1{font-size:30px}
+  .works-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .filter-sort{margin-left:0;width:100%;justify-content:space-between}
+}
+@media (max-width:500px){
+  .works-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient"></div>
+
+<nav>
+  <div class="nav-left">
+    <a href="index.html" class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text-1">Tropico</div>
+    </a>
+    <div class="nav-tabs">
+      <a href="app.html" class="nav-tab">Create</a>
+      <a href="app-history.html" class="nav-tab active">▸ My works</a>
+      <a href="#" class="nav-tab">Billing</a>
+      <a href="#" class="nav-tab">Settings</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="balance">
+      <span>✦</span>
+      <span class="balance-num">2</span>
+      <span style="opacity:.7">renders</span>
+      <a href="#" class="balance-add">+</a>
+    </div>
+    <div class="lang-switch">
+      <a class="active">EN</a>
+      <a href="app-history-ru.html">RU</a>
+    </div>
+    <div class="profile-btn" title="Max Yudin">M</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-h1">My <em>works</em></h1>
+      <p class="page-sub">All your renders, in one place. Click any to view full size, download, or remix.</p>
+    </div>
+    <div class="page-count"><strong>12</strong> renders</div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-chip active">All</button>
+    <button class="filter-chip">Sketch</button>
+    <button class="filter-chip">Floor plan</button>
+    <button class="filter-chip">Plot placement</button>
+    <button class="filter-chip">Complex</button>
+    <button class="filter-chip">Interior</button>
+    <button class="filter-chip">Text-only</button>
+    <div class="filter-sort">
+      <span>Sort by:</span>
+      <select>
+        <option>Newest first</option>
+        <option>Oldest first</option>
+        <option>Most upgraded</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- WORKS GRID -->
+  <div class="works-grid">
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/villa-golden-hour.jpg" alt="">
+        <div class="work-card-tag">Sketch</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Modern Bali villa, golden hour, cliffside</div>
+        <div class="work-card-meta">
+          <span>Today, 14:32</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/complex-masterplan.jpg" alt="">
+        <div class="work-card-tag">Complex</div>
+        <div class="work-card-premium">✦ $10</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Beachfront resort master plan with labels</div>
+        <div class="work-card-meta">
+          <span>Today, 11:18</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/villa-cliffside.jpg" alt="">
+        <div class="work-card-tag">Sketch</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Uluwatu cliffside villa, sunset</div>
+        <div class="work-card-meta">
+          <span>Yesterday</span>
+          <span>4K ✦</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/int-living.jpg" alt="">
+        <div class="work-card-tag">Interior</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Tropical living room with pool view</div>
+        <div class="work-card-meta">
+          <span>Yesterday</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/show-plot-after.jpg" alt="">
+        <div class="work-card-tag">Plot</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Villa placed on Tabanan plot</div>
+        <div class="work-card-meta">
+          <span>2 days ago</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/villa-beachfront.jpg" alt="">
+        <div class="work-card-tag">Floor plan</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Beachfront villa from 2D plan</div>
+        <div class="work-card-meta">
+          <span>3 days ago</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/hotel-rooftop.jpg" alt="">
+        <div class="work-card-tag">Text-only</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Boutique hotel with rooftop infinity pool</div>
+        <div class="work-card-meta">
+          <span>3 days ago</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/int-bedroom.jpg" alt="">
+        <div class="work-card-tag">Interior</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Modern Bali bedroom restyle</div>
+        <div class="work-card-meta">
+          <span>4 days ago</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-card-img">
+        <img src="img/villa-jungle.jpg" alt="">
+        <div class="work-card-tag">Sketch</div>
+        <div class="work-card-actions">
+          <a class="work-card-action work-card-action-primary">Download</a>
+          <a class="work-card-action">4K $1</a>
+          <a class="work-card-action">Remix</a>
+        </div>
+      </div>
+      <div class="work-card-body">
+        <div class="work-card-title">Ubud jungle villa, morning mist</div>
+        <div class="work-card-meta">
+          <span>5 days ago</span>
+          <span>1080p</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Optional: empty state, shown when no works -->
+  <!--
+  <div class="empty-state">
+    <div class="empty-icon">+</div>
+    <div class="empty-title">No <em>renders yet</em></div>
+    <p class="empty-desc">Create your first render — your 2 free credits are waiting. Takes about a minute.</p>
+    <a href="app.html" class="empty-cta">Create your first render →</a>
+  </div>
+  -->
+
+</div>
+
+<script>
+  document.querySelectorAll('.filter-chip').forEach(c => c.addEventListener('click', function(){
+    document.querySelectorAll('.filter-chip').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+  }));
+</script>
+
+</body>
+</html>
