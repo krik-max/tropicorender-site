@@ -213,7 +213,7 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
   <div class="nav-right">
     <div class="balance">
       <span>✦</span>
-      <span class="balance-num">2</span>
+      <span class="balance-num">3</span>
       <span style="opacity:.7">renders</span>
       <a href="#" class="balance-add">+</a>
     </div>
@@ -456,7 +456,7 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
   <div class="submit-bar">
     <div class="submit-info">
       <div class="submit-info-title">Ready to render?</div>
-      <div class="submit-info-meta" id="submit-meta">Uses <strong>1 of 2</strong> renders · ~60 seconds</div>
+      <div class="submit-info-meta" id="submit-meta">Uses <strong>1 of 3</strong> renders · ~60 seconds</div>
     </div>
     <button class="submit-btn" onclick="alert('Render started (mock)')">
       ✦ Generate <span class="submit-arrow">→</span>
@@ -563,9 +563,9 @@ nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:cen
     // Update submit meta for premium tier
     const meta = document.getElementById('submit-meta');
     if (taskId === 'complex') {
-      meta.innerHTML = '<strong style="color:var(--amber)">Premium render</strong> — uses 1 of 2 free renders OR $10 · ~60 seconds';
+      meta.innerHTML = '<strong style="color:var(--amber)">Premium render</strong> — uses 1 of 3 free renders OR $10 · ~60 seconds';
     } else {
-      meta.innerHTML = 'Uses <strong>1 of 2</strong> renders · ~60 seconds';
+      meta.innerHTML = 'Uses <strong>1 of 3</strong> renders · ~60 seconds';
     }
   }
 

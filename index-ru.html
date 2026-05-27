@@ -50,7 +50,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Manrope',-apple-sys
 
 /* ===== TICKER ===== */
 .ticker{background:var(--paper);color:var(--bg);padding:11px 0;font-size:11px;letter-spacing:.18em;text-transform:uppercase;overflow:hidden;position:relative;z-index:2;border-bottom:1px solid rgba(0,0,0,.08)}
-.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:march 45s linear infinite;font-weight:600;font-family:'JetBrains Mono',monospace}
+.ticker-track{display:flex;gap:48px;white-space:nowrap;animation:march 25s linear infinite;font-weight:600;font-family:'JetBrains Mono',monospace}
 @keyframes march{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .ticker-track span{display:inline-flex;align-items:center;gap:48px}
 .ticker-track span::after{content:"◆";color:var(--amber-deep)}
@@ -332,6 +332,49 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
   .foot-grid{grid-template-columns:1fr 1fr;gap:32px}
   .foot-bottom{flex-direction:column;gap:12px}
 }
+
+/* ===== PAYMENT MODAL ===== */
+.pay-modal-overlay{position:fixed;inset:0;background:rgba(8,14,12,.78);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .25s}
+.pay-modal-overlay.open{display:flex;opacity:1}
+.pay-modal{background:var(--card);border:1px solid var(--line-bright);border-radius:24px;max-width:520px;width:100%;padding:36px 32px;position:relative;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s}
+.pay-modal-overlay.open .pay-modal{transform:translateY(0)}
+.pay-modal-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--ink-dim);font-size:24px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .2s}
+.pay-modal-close:hover{background:rgba(255,255,255,.06);color:var(--ink)}
+.pay-modal-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.pay-modal-title{font-family:'Fraunces',serif;font-size:30px;font-weight:300;line-height:1.1;margin-bottom:6px;letter-spacing:-.02em}
+.pay-modal-title em{font-style:italic;color:var(--amber)}
+.pay-modal-sub{font-size:14px;color:var(--ink-dim);margin-bottom:24px;line-height:1.5}
+.pay-modal-notice{background:rgba(232,165,87,.07);border:1px solid rgba(232,165,87,.18);border-radius:14px;padding:16px 18px;margin-bottom:22px;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.pay-modal-notice strong{color:var(--amber)}
+.pay-options{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.pay-option{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--ink);text-decoration:none;transition:all .2s;font-size:14px}
+.pay-option:hover{border-color:var(--amber);background:rgba(232,165,87,.06)}
+.pay-option-primary{background:var(--amber);color:var(--bg);border-color:var(--amber);font-weight:600}
+.pay-option-primary:hover{background:var(--coral);border-color:var(--coral);color:var(--paper)}
+.pay-option-icon{font-size:18px;line-height:1}
+.pay-option-text{flex:1}
+.pay-option-text strong{display:block;font-weight:600;margin-bottom:2px}
+.pay-option-text small{font-size:12px;color:var(--ink-dim);font-weight:400}
+.pay-option-primary .pay-option-text small{color:rgba(12,22,18,.7)}
+.pay-option-arrow{font-size:14px;opacity:.7}
+.pay-modal-divider{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-low);margin:18px 0 14px;position:relative}
+.pay-modal-divider::before,.pay-modal-divider::after{content:"";position:absolute;top:50%;width:38%;height:1px;background:var(--line)}
+.pay-modal-divider::before{left:0}.pay-modal-divider::after{right:0}
+@media (max-width:640px){
+  .pay-modal{padding:28px 22px;border-radius:20px}
+  .pay-modal-title{font-size:24px}
+}
+
+/* ===== MOBILE FIX: showcase text below image, not overlay ===== */
+@media (max-width:640px){
+  .show-card{display:flex;flex-direction:column;aspect-ratio:auto !important}
+  .show-card img{aspect-ratio:4/3;height:auto}
+  .show-card::after{display:none}
+  .show-overlay{position:static;padding:18px 20px 22px;background:var(--card);color:var(--ink)}
+  .show-tag{background:rgba(232,165,87,.12);border-color:rgba(232,165,87,.3);color:var(--amber);backdrop-filter:none;margin-bottom:10px}
+  .show-title,.show-large .show-title{font-size:24px;line-height:1.1;color:var(--ink);margin-bottom:8px}
+  .show-desc{color:var(--ink-dim);font-size:14px;max-width:100%}
+}
 </style>
 </head>
 <body>
@@ -434,14 +477,14 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
     <div class="section-head">
       <div>
         <div class="section-eyebrow">Расчёты</div>
-        <h2 class="section-h2">Студия на Бали. <em>Или Tropico.</em></h2>
+        <h2 class="section-h2">Дизайн-студия. <em>Или Tropico.</em></h2>
       </div>
-      <p class="section-aside">Реальные цены балийских рендер-студий в 2026 году — рядом с тем, сколько стоит Tropico. Результат один и тот же, разница в запятой.</p>
+      <p class="section-aside">Реальные цены архитектурных студий Юго-Восточной Азии в 2026 году — рядом с тем, сколько стоит Tropico. Результат один и тот же, разница в запятой.</p>
     </div>
 
     <div class="compare-table">
       <div class="compare-cell compare-head">Задача</div>
-      <div class="compare-cell compare-head compare-head-studio">Студия Бали</div>
+      <div class="compare-cell compare-head compare-head-studio">Дизайн-студия</div>
       <div class="compare-cell compare-head compare-head-tr">Tropico</div>
 
       <div class="compare-cell">
@@ -771,7 +814,7 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
           <li>Апгрейд до 4K за +$1</li>
           <li>Без срока действия</li>
         </ul>
-        <a href="#" class="price-cta">Выбрать</a>
+        <a href="#" class="price-cta" onclick="openPayModal(event, 'Один рендер', '$1', 'за один рендер')">Выбрать</a>
       </div>
 
       <div class="price-card price-card-best">
@@ -790,7 +833,7 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
           <li>Апгрейд до 4K за +$1</li>
           <li>Без срока действия</li>
         </ul>
-        <a href="#" class="price-cta">Купить пакет</a>
+        <a href="#" class="price-cta" onclick="openPayModal(event, 'Пакет 20', '$15', 'разово, 20 рендеров')">Купить пакет</a>
       </div>
 
       <div class="price-card">
@@ -807,7 +850,7 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
           <li>Приоритетный ответ от команды</li>
           <li>Отмена в любой момент</li>
         </ul>
-        <a href="#" class="price-cta">Подписаться</a>
+        <a href="#" class="price-cta" onclick="openPayModal(event, 'Pro', '$28', 'в месяц, 100 рендеров')">Подписаться</a>
       </div>
 
     </div>
@@ -820,7 +863,7 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
       <div class="price-premium-icon">✦</div>
       <div class="price-premium-content">
         <div class="price-premium-title">Мастерпланы и комплексы вилл — <em>$10 за рендер</em></div>
-        <p class="price-premium-desc">Aerial-виды комплексов, мастерпланы с разметкой и масштабные девелопменты требуют более глубокой работы AI. Они стоят <strong>$10 за рендер</strong> независимо от тарифа. <strong>Ваши 2 бесплатных рендера работают и здесь</strong> — попробуйте за наш счёт.</p>
+        <p class="price-premium-desc">Aerial-виды комплексов, мастерпланы с разметкой и масштабные девелопменты требуют более глубокой работы AI. Они стоят <strong>$10 за рендер</strong> независимо от тарифа. <strong>Ваши 3 бесплатных рендера работают и здесь</strong> — попробуйте за наш счёт.</p>
       </div>
     </div>
   </div>
@@ -878,6 +921,76 @@ footer{padding:80px 40px 40px;border-top:1px solid var(--line);position:relative
     <span>tropicorender.com</span>
   </div>
 </footer>
+
+<!-- ===== PAYMENT MODAL ===== -->
+<div class="pay-modal-overlay" id="payModal" onclick="closePayModal(event)">
+  <div class="pay-modal" onclick="event.stopPropagation()">
+    <button class="pay-modal-close" onclick="closePayModal()" aria-label="Закрыть">×</button>
+    <div class="pay-modal-eyebrow" id="payModalEyebrow">Выбранный тариф</div>
+    <h3 class="pay-modal-title"><span id="payModalPlan">Пакет 20</span> · <em id="payModalPrice">$15</em></h3>
+    <p class="pay-modal-sub" id="payModalDetail">разово, 20 рендеров</p>
+
+    <div class="pay-modal-notice">
+      <strong>Важно — про оплату.</strong>
+      Tropico Render развивает фаундер из России в процессе релокации. Иностранного юрлица пока нет, поэтому платежи проходят одним из двух способов ниже. Любой способ — пополнение баланса происходит сразу.
+    </div>
+
+    <div class="pay-options">
+      <a href="#" class="pay-option pay-option-primary" onclick="payCryptomus(event)">
+        <span class="pay-option-icon">◆</span>
+        <span class="pay-option-text">
+          <strong>Оплатить через Cryptomus</strong>
+          <small>Visa, Mastercard, USDT, BTC — работает по всему миру</small>
+        </span>
+        <span class="pay-option-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="pay-modal-divider">или связаться напрямую</div>
+
+    <div class="pay-options">
+      <a href="https://wa.me/79959869690" target="_blank" class="pay-option">
+        <span class="pay-option-icon">📱</span>
+        <span class="pay-option-text">
+          <strong>Написать Максу в WhatsApp</strong>
+          <small>Договоримся о банковском переводе, Wise или другом способе</small>
+        </span>
+        <span class="pay-option-arrow">→</span>
+      </a>
+      <a href="https://t.me/render_prosto_support" target="_blank" class="pay-option">
+        <span class="pay-option-icon">✈️</span>
+        <span class="pay-option-text">
+          <strong>Поддержка в Telegram</strong>
+          <small>Прямой чат с командой</small>
+        </span>
+        <span class="pay-option-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openPayModal(e, planName, price, detail){
+    if(e) e.preventDefault();
+    document.getElementById('payModalPlan').textContent = planName;
+    document.getElementById('payModalPrice').textContent = price;
+    document.getElementById('payModalDetail').textContent = detail;
+    document.getElementById('payModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closePayModal(e){
+    if(e && e.target && !e.target.classList.contains('pay-modal-overlay') && e.target.tagName !== 'BUTTON') return;
+    document.getElementById('payModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function payCryptomus(e){
+    e.preventDefault();
+    alert('Оплата через Cryptomus скоро заработает. Пока — напишите нам в WhatsApp или Telegram ниже, начислим рендеры вручную за пару минут.');
+  }
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') closePayModal({target: document.getElementById('payModal')});
+  });
+</script>
 
 </body>
 </html>
